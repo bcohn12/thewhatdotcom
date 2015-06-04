@@ -10,13 +10,31 @@
 
 		/*
 			APIKEYS HERE
+			Key for browser applications
+
+API key	
+AIzaSyCqcgQbGQoh931X9lG4EJNfoodV8TGVAkM
+
+Yelp:
+API v2.0
+Consumer Key	ma_curVH7uB2Irv3agnk7w
+Consumer Secret	_f-oC6F-dZfUQ4yqUHVoXiRJGVk
+Token	ZnMFKkbc1JO7gzDMbBSMhYVTLPIXoDjm
+Token Secret	jb86TLvo5Xe6nBgutIKmyVWNMGc
+
+meetup
+412716642323694c4d1eb266c3c7d60
+
 		*/
 		var services = {
+
 			"google": {
+				API_KEY : "AIzaSyCqcgQbGQoh931X9lG4EJNfoodV8TGVAkM",
+				radius: "32186",	
 				getQuery: function(query, coords){
 					//https://developers.google.com/places/webservice/search#TextSearchRequests
 					return "https://maps.googleapis.com/maps/api/place/textsearch/json"+
-						"?latitude="+coords.latitude+"&longitude="+coords.longitude+"&query="+query
+						"?latitude="+coords.latitude+"&longitude="+coords.longitude+"&query="+query + "&key="+this.API_KEY + "&radius=" + this.radius
 				},
 				getSearchResult: function(obj){
 					obj = obj.results[Math.floor(obj.results.length*Math.random())];
@@ -28,6 +46,7 @@
 				}
 			},
 			"yelp":{
+
 				getQuery: function(query,coords){
 					//https://www.yelp.com/developers/documentation/v2/search_api
 					return "http://api.yelp.com/v2/search" +
@@ -43,10 +62,11 @@
 				}
 			},
 			"meetup": {
+				API_KEY : "412716642323694c4d1eb266c3c7d60",
 				getQuery: function(query,coords){
 					//https://secure.meetup.com/meetup_api/console/?path=/2/cities
 					return "https://api.meetup.com/find/groups"+
-					"?lat="+coords.latitude+"&lon="+coords.longitude+"&text="+query
+					"?lat="+coords.latitude+"&lon="+coords.longitude+"&text="+query + "&key=" + this.API_KEY
 				},
 				getSearchResult: function(obj){
 					var key = Object.keys(obj);
@@ -62,25 +82,26 @@
 			}
 		};
 
-		function Plan(list){
+		function Plan(list, query){
 			this.list = list;
-			this.query = document.getElementById("query").value;
+			this.query = query
 			var self = this;
 			navigator.geolocation.getCurrentPosition(function(position) {
 				self.coords = position.coords;
+				//run the following fn call ten times 
 				for(var i=0;i<10;i++) self.getRandom();
 			});
 		}
 		Plan.prototype.getRandom = function(){
-			var key = Object.keys(services);
-			key = key[Math.floor(key.length*Math.random())];
+			var key = Object.keys(services); //gets all possible services
+			key = key[Math.floor(key.length*Math.random())]; //picks a random
 			var self = this;
 			var req = new XMLHttpRequest();
 			req.addEventListener("load",function(res){
-				self.renderItem(getSearchResult(JSON.parse(res.responseText)),this.coords);
+				self.renderItem(services[key].getSearchResult(JSON.parse(res.responseText)),this.coords);
 			});
-			req.open("get", services[key].getQuery(this.query,this.location), true);
-			oReq.send();
+			req.open("get", services[key].getQuery(this.query,this.coords), true);
+			req.send();
 		};
 		Plan.prototype.renderItem = function(obj){
 			var li = document.createElement("li");
@@ -89,10 +110,13 @@
 		};
 
 		window.addEventListener("load",function(){
+			// this is a button
 			document.getElementById("plan-maker").addEventListener("click",function(){
 				var plan = document.getElementById("plan");
+				//empty the list so it's prepped for filling
 				plan.innerHTML = "";
-				new Plan(plan);
+
+				new Plan(plan, "this can be replaced with the query later");
 			});
 		});
 	</script>
