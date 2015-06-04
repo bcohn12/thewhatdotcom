@@ -17,7 +17,6 @@
 		}
 		var services = {
 			"google": function(query, coords){
-				//https://developers.google.com/places/webservice/search#TextSearchRequests
 				return "https://maps.googleapis.com/maps/api/" +
 					"place/textsearch/output"+
 					"?latitude="+coords.latitude+"&longitude="+coords.longitude+"&query="+query
@@ -25,13 +24,9 @@
 			"yelp":function(query,coords){
 				//https://www.yelp.com/developers/documentation/v2/search_api
 				return "http://api.yelp.com/v2/search" +
-				"?latitude="+coords.latitude+"&longitude="+coords.longitude+"&term="+query
+				"?latitude=
 			},
-			"meetup": function(query,coords){
-				//https://secure.meetup.com/meetup_api/console/?path=/2/cities
-				return "https://api.meetup.com/2/cities"+
-				"?lat="+coords.latitude+"&lon="+coords.longitude+"&query="+query
-			}
+			"meetup": "https://api.meetup.com/2/cities"
 		};
 
 		function Plan(){
