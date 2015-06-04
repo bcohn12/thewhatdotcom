@@ -7,10 +7,10 @@
 			/* geolocation IS NOT available */
 			throw new Error("cannot get current location");
 		}
-		var curloc;
-		navigator.geolocation.getCurrentPosition(function(position) {
-			curloc = position.coords;
-		});
+
+		/*
+			APIKEYS HERE
+		*/
 		var services = {
 			"google": {
 				getQuery: function(query, coords){
@@ -64,18 +64,28 @@
 
 		function Plan(list){
 			this.list = list;
-			for(var i=0;i<10;i++) this.getRandom();
+			this.query = document.getElementById("query").value;
+			var self = this;
+			navigator.geolocation.getCurrentPosition(function(position) {
+				self.coords = position.coords;
+				for(var i=0;i<10;i++) self.getRandom();
+			});
 		}
 		Plan.prototype.getRandom = function(){
 			var key = Object.keys(services);
 			key = key[Math.floor(key.length*Math.random())];
 			var self = this;
-			$.json(services[key].getQuery(this.query,this.location)).done(function(res){
-				self.renderItem(getSearchResult(res));
+			var req = new XMLHttpRequest();
+			req.addEventListener("load",function(res){
+				self.renderItem(getSearchResult(JSON.parse(res.responseText)),this.coords);
 			});
+			req.open("get", services[key].getQuery(this.query,this.location), true);
+			oReq.send();
 		};
 		Plan.prototype.renderItem = function(obj){
-			this.list.innerHTML += "<li>"+name+"</li>";
+			var li = document.createElement("li");
+			li.innerHTML = obj.name;
+			this.list.appenChild(li);
 		};
 
 		window.addEventListener("load",function(){
@@ -88,7 +98,8 @@
 	</script>
 	</head>
 	<body>
-		<button id="plan-maker"></button>
+		<input type="text" id="query" />
+		<button id="plan-maker">Make Plan</button>
 		<ul id="plan"></ul>
 	</body>
 </html>
