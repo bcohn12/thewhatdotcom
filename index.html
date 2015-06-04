@@ -1,6 +1,7 @@
 <!Doctype html>
 <html>
 
+	<head>
 	<script type="text/javascript" >
 		if (!("geolocation" in navigator)) {
 			/* geolocation IS NOT available */
@@ -10,36 +11,84 @@
 		navigator.geolocation.getCurrentPosition(function(position) {
 			curloc = position.coords;
 		});
-		function makePlan(){
-			return Promise(function(){
-				
-			});
-		}
 		var services = {
-			"google": function(query, coords){
-				//https://developers.google.com/places/webservice/search#TextSearchRequests
-				return "https://maps.googleapis.com/maps/api/" +
-					"place/textsearch/output"+
-					"?latitude="+coords.latitude+"&longitude="+coords.longitude+"&query="+query
+			"google": {
+				getQuery: function(query, coords){
+					//https://developers.google.com/places/webservice/search#TextSearchRequests
+					return "https://maps.googleapis.com/maps/api/place/textsearch/json"+
+						"?latitude="+coords.latitude+"&longitude="+coords.longitude+"&query="+query
+				},
+				getSearchResult: function(obj){
+					obj = obj.results[Math.floor(obj.results.length*Math.random())];
+					return {
+						name: obj.name,
+						image: obj.photo[0],
+						location:obj.location
+					}
+				}
 			},
-			"yelp":function(query,coords){
-				//https://www.yelp.com/developers/documentation/v2/search_api
-				return "http://api.yelp.com/v2/search" +
-				"?latitude="+coords.latitude+"&longitude="+coords.longitude+"&term="+query
+			"yelp":{
+				getQuery: function(query,coords){
+					//https://www.yelp.com/developers/documentation/v2/search_api
+					return "http://api.yelp.com/v2/search" +
+					"?latitude="+coords.latitude+"&longitude="+coords.longitude+"&term="+query
+				},
+				getSearchResult: function(obj){
+					obj = obj.businesses[Math.floor(obj.businesses.length*Math.random())];
+					return {
+						name:obj.name,
+						image: obj.image_url,
+						location:obj.location
+					}
+				}
 			},
-			"meetup": function(query,coords){
-				//https://secure.meetup.com/meetup_api/console/?path=/2/cities
-				return "https://api.meetup.com/2/cities"+
-				"?lat="+coords.latitude+"&lon="+coords.longitude+"&query="+query
+			"meetup": {
+				getQuery: function(query,coords){
+					//https://secure.meetup.com/meetup_api/console/?path=/2/cities
+					return "https://api.meetup.com/find/groups"+
+					"?lat="+coords.latitude+"&lon="+coords.longitude+"&text="+query
+				},
+				getSearchResult: function(obj){
+					var key = Object.keys(obj);
+					obj = obj[key[Math.floor(key.length*Math.random())]];
+					return {
+						name:obj.name,
+						location:{
+							latitude:obj.lat,
+							longitude:obj.lon
+						}
+					};
+				}
 			}
 		};
 
-		function Plan(){
+		function Plan(list){
+			this.list = list;
+			for(var i=0;i<10;i++) this.getRandom();
 		}
-		Plan.prototype.addRandom = function(){
+		Plan.prototype.getRandom = function(){
+			var key = Object.keys(services);
+			key = key[Math.floor(key.length*Math.random())];
+			var self = this;
+			$.json(services[key].getQuery(this.query,this.location)).done(function(res){
+				self.renderItem(getSearchResult(res));
+			});
 		};
-		function addToPlan(query){
-			
-		}
+		Plan.prototype.renderItem = function(obj){
+			this.list.innerHTML += "<li>"+name+"</li>";
+		};
+
+		window.addEventListener("load",function(){
+			document.getElementById("plan-maker").addEventListener("click",function(){
+				var plan = document.getElementById("plan");
+				plan.innerHTML = "";
+				new Plan(plan);
+			});
+		});
 	</script>
+	</head>
+	<body>
+		<button id="plan-maker"></button>
+		<ul id="plan"></ul>
+	</body>
 </html>
