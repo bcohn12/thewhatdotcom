@@ -1,0 +1,40 @@
+<!Doctype html>
+<html>
+
+	<script type="text/javascript" >
+		if (!("geolocation" in navigator)) {
+			/* geolocation IS NOT available */
+			throw new Error("cannot get current location");
+		}
+		var curloc;
+		navigator.geolocation.getCurrentPosition(function(position) {
+			curloc = position.coords;
+		});
+		function makePlan(){
+			return Promise(function(){
+				
+			});
+		}
+		var services = {
+			"google": function(query, coords){
+				return "https://maps.googleapis.com/maps/api/" +
+					"place/textsearch/output"+
+					"?latitude="+coords.latitude+"&longitude="+coords.longitude+"&query="+query
+			},
+			"yelp":function(query,coords){
+				//https://www.yelp.com/developers/documentation/v2/search_api
+				return "http://api.yelp.com/v2/search" +
+				"?latitude=
+			},
+			"meetup": "https://api.meetup.com/2/cities"
+		};
+
+		function Plan(){
+		}
+		Plan.prototype.addRandom = function(){
+		};
+		function addToPlan(query){
+			
+		}
+	</script>
+</html>
